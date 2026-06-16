@@ -1,4 +1,3 @@
-using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,20 +5,19 @@ public class PlatformParams : MonoBehaviour
 {
     public IntVector3 GridPos;
 
-    //In Order:
-    // 0 = standard, 1 = New Platform
+    // 0 = standard, 1 = next platform
     public List<Material> Materials;
     public bool IsNext;
 
     [SerializeField]
-    private MeshRenderer render;
+    protected MeshRenderer render;
 
-    void Start()
+    protected virtual void Start()
     {
-        transform.position = new Vector3(GridPos.x * 10, GridPos.y, GridPos.z * 10);
+        transform.position = GridToWorld(GridPos);
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (IsNext) render.material = Materials[1];
         else render.material = Materials[0];
@@ -27,4 +25,11 @@ public class PlatformParams : MonoBehaviour
 
     }
 
+    protected Vector3 GridToWorld(IntVector3 pos)
+    {
+        return new Vector3(
+            pos.x * 10,
+            pos.y,
+            pos.z * 10);
+    }
 }

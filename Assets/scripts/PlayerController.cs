@@ -9,11 +9,21 @@ public class PlayerController : MonoBehaviour
     public float jumpHeight = 1.5f;
     public float gravity = -20f;
 
+    public float acceleration = 12f;
+    public float deceleration = 16f;
+
     public float mouseSensitivity = 120f;
+    public float cameraSmoothTime = 0.03f;
 
     private CharacterController controller;
+
     private Vector3 velocity;
+    private Vector3 currentMoveVelocity;
+
     private float xRotation = 0f;
+
+    private Vector2 smoothedMouseDelta;
+    private Vector2 mouseDeltaVelocity;
 
     void Start()
     {
@@ -25,6 +35,7 @@ public class PlayerController : MonoBehaviour
         if (cameraTransform == null)
         {
             Camera cam = GetComponentInChildren<Camera>();
+
             if (cam != null)
                 cameraTransform = cam.transform;
         }
@@ -34,15 +45,15 @@ public class PlayerController : MonoBehaviour
     {
         LookAround();
         MovePlayer();
-
-
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         GameObject t = hit.gameObject;
 
-        if (t != null && t.name.Contains("Platform") && t.GetComponent<PlatformParams>().IsNext)
+        if (t != null &&
+            t.name.Contains("Platform") &&
+            t.GetComponent<PlatformParams>().IsNext)
         {
             PlatformGrid.instance.NextPlatform();
         }
@@ -53,17 +64,31 @@ public class PlayerController : MonoBehaviour
         if (Mouse.current == null || cameraTransform == null)
             return;
 
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+        Vector2 rawMouseDelta = Mouse.current.delta.ReadValue();
 
-        float mouseX = mouseDelta.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = mouseDelta.y * mouseSensitivity * Time.deltaTime;
+        smoothedMouseDelta = Vector2.SmoothDamp(
+            smoothedMouseDelta,
+            rawMouseDelta,
+            ref mouseDeltaVelocity,
+            cameraSmoothTime);
+
+        float mouseX =
+            smoothedMouseDelta.x *
+            mouseSensitivity *
+            Time.deltaTime;
+
+        float mouseY =
+            smoothedMouseDelta.y *
+            mouseSensitivity *
+            Time.deltaTime;
 
         transform.Rotate(Vector3.up * mouseX);
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -85f, 85f);
 
-        cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        cameraTransform.localRotation =
+            Quaternion.Euler(xRotation, 0f, 0f);
     }
 
     void MovePlayer()
@@ -93,21 +118,38 @@ public class PlayerController : MonoBehaviour
         if (Keyboard.current.sKey.isPressed)
             z -= 1f;
 
-        Vector3 move = transform.right * x + transform.forward * z;
+        Vector3 desiredMove =
+            transform.right * x +
+            transform.forward * z;
 
-        if (move.magnitude > 1f)
-            move.Normalize();
+        if (desiredMove.magnitude > 1f)
+            desiredMove.Normalize();
 
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        desiredMove *= moveSpeed;
 
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
+        float smoothSpeed =
+            desiredMove.magnitude > 0.01f
+                ? acceleration
+                : deceleration;
+
+        currentMoveVelocity = Vector3.Lerp(
+            currentMoveVelocity,
+            desiredMove,
+            smoothSpeed * Time.deltaTime);
+
+        controller.Move(
+            currentMoveVelocity * Time.deltaTime);
+
+        if (Keyboard.current.spaceKey.wasPressedThisFrame &&
+            isGrounded)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            velocity.y = Mathf.Sqrt(
+                jumpHeight * -2f * gravity);
         }
 
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+
+        controller.Move(
+            velocity * Time.deltaTime);
     }
-
-
 }

@@ -9,6 +9,10 @@ public class PlatformGrid : MonoBehaviour
 
     [SerializeField]
     private GameObject PlatformPrefab;
+    [SerializeField]
+    private GameObject MovingPlatformPrefab;
+
+
 
     public static PlatformGrid instance;
 
@@ -39,6 +43,12 @@ public class PlatformGrid : MonoBehaviour
     public void AddPlatform(int x, int z)
     {
         AddPlatform(x, 0, z);
+    }
+
+    public void AddMovingPlatform(int x, int y, int z)
+    {
+
+
     }
 
     public void NextPlatform()

@@ -388,9 +388,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraTransform: {fileID: 414091500}
   moveSpeed: 8
-  jumpHeight: 2
+  jumpHeight: 2.2
   gravity: -25
+  acceleration: 5
+  deceleration: 12
   mouseSensitivity: 30
+  cameraSmoothTime: 0.02
 --- !u!1 &725466299
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,6 +551,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlatformGrid
   PlatformPrefab: {fileID: 7009794606347975774, guid: 2878cf77bd6c23948ac140d7a0e49c51, type: 3}
+  MovingPlatformPrefab: {fileID: 0}
 --- !u!4 &1314108141
 Transform:
   m_ObjectHideFlags: 0
