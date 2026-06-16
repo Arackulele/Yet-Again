@@ -34,6 +34,18 @@ public class PlayerController : MonoBehaviour
     {
         LookAround();
         MovePlayer();
+
+
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        GameObject t = hit.gameObject;
+
+        if (t != null && t.name.Contains("Platform") && t.GetComponent<PlatformParams>().IsNext)
+        {
+            PlatformGrid.instance.NextPlatform();
+        }
     }
 
     void LookAround()
@@ -96,4 +108,6 @@ public class PlayerController : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
+
+
 }
